@@ -436,6 +436,13 @@ ENABLE_PLUGIN_WITH_DEP(scrobbler2,
     CURL,
     libcurl >= 7.9.7)
 
+ENABLE_PLUGIN_WITH_DEP(npfilter,
+    Filter-like search in now playing tab,
+    auto,
+    GENERAL,
+    CURL,
+    libcurl >= 7.9.7)
+
 test_glspectrum () {
     if test $HAVE_MSWINDOWS = yes ; then
         have_glspectrum=yes
@@ -780,6 +787,7 @@ echo "  libnotify OSD:                          $have_notify"
 echo "  Linux Infrared Remote Control (LIRC):   $have_lirc"
 echo "  MPRIS 2 Server:                         $have_mpris2"
 echo "  Scrobbler 2.0:                          $have_scrobbler2"
+echo "  Now Playing Filter:                     $have_npfilter"
 echo "  Song Change:                            $have_songchange"
 echo
 
