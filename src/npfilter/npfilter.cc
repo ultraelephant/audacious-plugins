@@ -23,7 +23,7 @@
 #include <libaudcore/interface.h>
 #include <libaudcore/plugin.h>
 
-#define N_ITEMS 2
+#define N_ITEMS 1
 #define N_MENUS 3
 
 class NPFilter : public GeneralPlugin
@@ -42,7 +42,7 @@ public:
 
 EXPORT NPFilter aud_plugin_instance;
 
-static constexpr const char * titles[N_ITEMS] = {N_("Pla_y CD"), N_("_Add CD")};
+static constexpr const char * titles[N_ITEMS] = {N_("Hide")};
 
 static constexpr AudMenuID menus[N_MENUS] = {
     AudMenuID::Main,
@@ -50,9 +50,8 @@ static constexpr AudMenuID menus[N_MENUS] = {
     AudMenuID::Playlist
 };
 
-static void cd_play () {aud_drct_pl_open ("cdda://"); }
-static void cd_add () {aud_drct_pl_add ("cdda://", -1); }
-static void (* funcs[N_ITEMS]) () = {cd_play, cd_add};
+static void hide_track () {aud_drct_pl_open ("cdda://"); }
+static void (* funcs[N_ITEMS]) () = {hide_track};
 
 bool NPFilter::init ()
 {
