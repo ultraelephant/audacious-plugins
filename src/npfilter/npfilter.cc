@@ -22,6 +22,8 @@
 #include <libaudcore/i18n.h>
 #include <libaudcore/interface.h>
 #include <libaudcore/plugin.h>
+#include <libaudcore/tuple.h>
+#include <libaudcore/playlist.h>
 #include <gtk/gtk.h>
 
 #define N_ITEMS 1
@@ -53,25 +55,6 @@ static constexpr AudMenuID menus[N_MENUS] = {
     AudMenuID::Playlist
 };
 
-static void hide_track () {aud_drct_pl_open ("cdda://"); }
-static void (* funcs[N_ITEMS]) () = {hide_track};
-
-bool NPFilter::init ()
-{
-    for (int m = 0; m < N_MENUS; m ++)
-        for (int i = 0; i < N_ITEMS; i ++)
-            aud_plugin_menu_add (menus[m], funcs[i], _(titles[i]), "media-optical");
-
-    return true;
-}
-
-void NPFilter::cleanup ()
-{
-    for (int m = 0; m < N_MENUS; m ++)
-        for (int i = 0; i < N_ITEMS; i ++)
-            aud_plugin_menu_remove (menus[m], funcs[i]);
-}
-
 static GtkTextView * textview;
 static GtkTextBuffer * textbuffer;
 
@@ -102,6 +85,67 @@ static GtkWidget * build_widget ()
     gtk_box_pack_start ((GtkBox *) vbox, hbox, false, false, 0);
 
     return vbox;
+}
+
+static void update_lyrics_window (const char * title)
+{
+    GtkTextIter iter;
+
+    if (! textbuffer)
+        return;
+
+    gtk_text_buffer_set_text (textbuffer, "", -1);
+
+    gtk_text_buffer_get_start_iter (textbuffer, & iter);
+
+    gtk_text_buffer_insert_with_tags_by_name (textbuffer, & iter, title, -1, nullptr);
+
+    gtk_text_buffer_insert (textbuffer, & iter, "\n\n", -1);
+
+    gtk_text_buffer_get_start_iter (textbuffer, & iter);
+    gtk_text_view_scroll_to_iter (textview, & iter, 0, true, 0, 0);
+
+}
+
+static String get_title()
+{
+    String message_titel;
+    auto playlist = Playlist::playing_playlist ();
+    int num_entries = playlist.n_entries ();
+    Index<String> m_files;
+    for (int i = 0; i < num_entries; i ++)
+        {
+            if (playlist.entry_selected (i))
+                m_files.append (playlist.entry_filename (i));
+        }
+    for (auto & uri: m_files)
+        {
+            message_titel = uri;
+        }
+    return message_titel;
+ //   int position = playlist.get_position ();
+   // Tuple tuple = playlist.entry_tuple (-1);
+   // String title = tuple.get_str (Tuple::Title);
+   // return title;
+}
+
+static void hide_track () {update_lyrics_window (get_title()); }
+static void (* funcs[N_ITEMS]) () = {hide_track};
+
+bool NPFilter::init ()
+{
+    for (int m = 0; m < N_MENUS; m ++)
+        for (int i = 0; i < N_ITEMS; i ++)
+            aud_plugin_menu_add (menus[m], funcs[i], _(titles[i]), "media-optical");
+
+    return true;
+}
+
+void NPFilter::cleanup ()
+{
+    for (int m = 0; m < N_MENUS; m ++)
+        for (int i = 0; i < N_ITEMS; i ++)
+            aud_plugin_menu_remove (menus[m], funcs[i]);
 }
 
 void * NPFilter::get_gtk_widget ()
